@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#040906"><meta name="description" content="Buddy OS — pet digital e relógio de cabeceira"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="buddy-icon.svg" type="image/svg+xml"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"><title>Buddy OS Lite</title><style>:root{color-scheme:dark;box-sizing:border-box}*{box-sizing:border-box}html,body{min-height:100%;margin:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#06100b"><meta name="description" content="Buddy OS — pet digital e relógio de cabeceira"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="buddy-icon.svg" type="image/svg+xml"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"><title>Buddy OS // RETRO</title><style>:root{color-scheme:dark;box-sizing:border-box}*{box-sizing:border-box}html,body{min-height:100%;margin:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <style>
 /* Layout: tela única horizontal de cabeceira. Esquerda: Buddy (olhos + cérebro). Direita: relógio grande, fala do Buddy, e três blocos (clima, dólar, manchete). Nada rola. */
 :root{
@@ -122,6 +122,53 @@ canvas{display:block;width:100%;height:11vh;background:#020503;border-top:1px so
 #rot{display:none;position:fixed;inset:0;z-index:50;background:var(--bg);color:var(--g);place-items:center;text-align:center;font:600 18px var(--display);letter-spacing:.1em;padding:24px}
 @media (orientation:portrait){#rot{display:none}}
 @media (prefers-reduced-motion:reduce){.say p::after,.pop.go{animation:none}.eye,body{transition:none}}
+
+/* BUDDY RETRO: CRT fosfor, terminal e detalhes de hardware */
+:root{--bg:#030805;--panel:#07130c;--panel2:#0b1d11;--line:#245334;--g:#8cff9b;--g2:#3f9d54;--fg:#d8ffdd;--mute:#78a982;--display:"Chakra Petch","Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+body{background:radial-gradient(ellipse at center,#0a1b10 0%,#030805 72%);}
+body::after{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0px,rgba(111,255,143,.035) 1px,transparent 2px,transparent 4px);mix-blend-mode:screen;opacity:.42}
+.app{gap:1.7vh;padding:1.7vh max(1.7vh,env(safe-area-inset-right,0px)) 1.7vh max(1.7vh,env(safe-area-inset-left,0px));}
+.panel{background:linear-gradient(145deg,rgba(8,24,13,.97),rgba(3,10,6,.98));border-color:#285c36;box-shadow:inset 0 0 0 1px rgba(140,255,155,.035),0 0 20px rgba(25,140,52,.07)}
+.panel::before,.panel::after{width:1.2vh;height:1.2vh;border-color:var(--g)}
+.face{background:radial-gradient(ellipse at 50% 45%,#0b2111 0%,#020503 68%);}
+.face::before{content:"BUDDY TERMINAL / PET CORE";position:absolute;top:1.3vh;right:1.5vh;color:#4d8558;font:10px var(--mono);letter-spacing:.13em;}
+.face::after{background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 4px),radial-gradient(ellipse,transparent 48%,rgba(0,0,0,.4) 100%)}
+.eyes{gap:6vh;filter:drop-shadow(0 0 10px rgba(140,255,155,.25));}
+.eye{border-radius:2vh 2vh 1.2vh 1.2vh;position:relative;overflow:hidden;box-shadow:0 0 2.4vh rgba(140,255,155,.52),inset 0 0 1vh rgba(255,255,255,.18);animation:eyeGlow 4s ease-in-out infinite alternate}
+.eye::after{content:"";position:absolute;left:18%;top:15%;width:25%;height:13%;background:rgba(230,255,232,.72);border-radius:50%;}
+@keyframes eyeGlow{from{filter:brightness(.88)}to{filter:brightness(1.14)}}
+.s-happy .eye{border-radius:50% 50% 0 0;}
+.s-sleep .eye::after{display:none}
+.clock{font-size:clamp(40px,26vh,148px);letter-spacing:-.065em;text-shadow:0 0 1.2vh rgba(140,255,155,.55),0 0 3vh rgba(60,210,90,.18);}
+.date .d1{font-family:var(--mono);font-size:1.2em;letter-spacing:.06em;color:var(--g)}
+.tag{letter-spacing:.12em}
+.say{border-style:dashed;position:relative}
+.say::before{content:"> SYSTEM MESSAGE";position:absolute;top:7px;left:12px;font-size:9px;color:#4d8558;letter-spacing:.12em}
+.say p{padding-top:10px}
+.action-btn,.hub-tab{border:1px solid #367347;background:#07170c;color:var(--g);box-shadow:inset 0 0 12px rgba(60,180,80,.05);text-transform:uppercase}
+.action-btn{border-radius:2px}
+.action-btn:hover,.hub-tab.active{background:#14341c;box-shadow:0 0 12px rgba(140,255,155,.12)}
+.tile{border-top:2px solid #367347;position:relative}
+.tile .v{color:var(--g);text-shadow:0 0 12px rgba(140,255,155,.15)}.weather-icon{float:right;font-size:clamp(22px,6vh,40px);line-height:1;color:var(--g);text-shadow:0 0 12px rgba(140,255,155,.4)}
+.news .nt{border:1px solid #7ce98b;background:#173a20;color:#aaffb3;padding:2px 7px}
+.feed-item{border-left:2px solid #367347;background:linear-gradient(90deg,#0a1a0e,#061009)}
+#buddyHub{background:rgba(2,8,4,.985);backdrop-filter:blur(8px)}
+#buddySettings{position:fixed;inset:0;z-index:100;background:rgba(0,5,2,.92);display:none;place-items:center;padding:18px;backdrop-filter:blur(6px)}
+#buddySettings.open{display:grid}
+.settings-card{width:min(560px,100%);max-height:90dvh;overflow:auto;border:1px solid var(--g2);background:#061009;padding:18px;box-shadow:0 0 40px rgba(30,150,60,.16)}
+.settings-title{font:700 20px var(--display);color:var(--g);margin:0 0 4px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line);font-size:12px}
+.settings-row small{display:block;color:var(--mute);font-size:10px;margin-top:3px}
+.settings-row input{accent-color:var(--g);width:20px;height:20px}
+body.dim-mode{filter:brightness(.38)}
+body.no-crt::after{display:none}
+body.no-motion *,body.no-motion *::before,body.no-motion *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media (orientation:portrait){.app{gap:12px;padding:12px}.face::before{font-size:8px}.clock{font-size:clamp(52px,17vw,100px)}}
+
+.settings-section{padding:14px 0;border-bottom:1px solid var(--line)}.settings-label{font-size:10px;letter-spacing:.16em;color:var(--g);margin-bottom:10px}.theme-select{width:100%;background:#07170c;color:var(--fg);border:1px solid var(--g2);padding:11px;font:12px var(--mono)}.fine-row{display:grid;grid-template-columns:1fr minmax(120px,48%);align-items:center;gap:12px;padding:8px 0;color:var(--fg);font-size:11px}.fine-row input[type=range]{width:100%;accent-color:var(--g)}.fine-row input[type=color]{width:54px;height:30px;background:transparent;border:1px solid var(--line);justify-self:end}.settings-card{max-height:94dvh}.event-indicator{position:absolute;right:1.6vh;bottom:1.4vh;color:var(--g);font-size:9px;letter-spacing:.12em;opacity:.8}
+body[data-theme="amber"]{--bg:#0b0803;--panel:#171006;--panel2:#211608;--line:#65451d;--g:#ffbf69;--g2:#b87932;--fg:#ffebc9;--mute:#b18b5d}body[data-theme="ice"]{--bg:#03080d;--panel:#07131d;--panel2:#0c1e2c;--line:#24516a;--g:#79d9ff;--g2:#398bad;--fg:#d9f5ff;--mute:#78aabd}body[data-theme="mono"]{--bg:#050505;--panel:#101010;--panel2:#191919;--line:#555;--g:#e2e2e2;--g2:#999;--fg:#f3f3f3;--mute:#999}
+body.custom-theme{--g:var(--custom-accent);--g2:color-mix(in srgb,var(--custom-accent),#000 35%);--fg:color-mix(in srgb,var(--custom-accent),white 68%)}.eye{box-shadow:0 0 var(--glow,2.4vh) color-mix(in srgb,var(--g),transparent 45%),inset 0 0 1vh rgba(255,255,255,.18)}body::after{opacity:var(--scan,.42)}.eye,.pop.go{animation-duration:var(--speed,1s)!important}
+
 </style>
 
 <div id="rot">GIRE O CELULAR<br>PARA O MODO HORIZONTAL</div>
@@ -130,7 +177,7 @@ canvas{display:block;width:100%;height:11vh;background:#020503;border-top:1px so
     <div class="face s-neutral" id="face" role="button" tabindex="0" aria-label="Toque e segure para fazer carinho no Buddy">
       <div class="mood tag"><b id="bstat">online</b><div class="m1" id="mood">calmo · observando</div></div>
       <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-      <div class="hint">segure para carinho</div>
+      <div class="hint">segure para carinho</div><div class="event-indicator" id="eventIndicator">PET CORE // ATIVO</div>
       <div class="pop" id="pop">+1 RECOMPENSA</div>
     </div>
     <div>
@@ -142,7 +189,7 @@ canvas{display:block;width:100%;height:11vh;background:#020503;border-top:1px so
   <div class="right">
     <div class="head">
       <div class="clock" id="clock">--:--</div>
-      <div class="date"><div class="d1" id="date">—</div><div class="stat tag"><span class="dot" id="dot"></span><span id="mode">…</span></div></div><div class="head-actions"><button class="action-btn" id="openHub">CENTRAL DO BUDDY</button><button class="action-btn" id="installPwa" hidden>INSTALAR</button></div>
+      <div class="date"><div class="d1" id="date">—</div><div class="stat tag"><span class="dot" id="dot"></span><span id="mode">…</span></div></div><div class="head-actions"><button class="action-btn" id="nightToggle" aria-pressed="false">MODO NOITE</button><button class="action-btn" id="settingsOpen">AJUSTES</button><button class="action-btn" id="openHub">CENTRAL</button><button class="action-btn" id="installPwa" hidden>INSTALAR</button></div>
     </div>
 
     <section class="panel say" id="sayBox">
@@ -166,6 +213,19 @@ canvas{display:block;width:100%;height:11vh;background:#020503;border-top:1px so
   <div class="hub-view" id="view-about"><div class="feed-item"><div class="feed-meta"><span class="feed-tag">BUDDY OS LITE</span><span>FUNCIONAMENTO LOCAL</span></div><p>O Buddy não usa inteligência artificial. O pet, o humor e as reações são controlados pelo próprio aplicativo.</p><p>Notícias, clima e câmbio são consultados diretamente de serviços públicos. Os últimos dados ficam salvos neste celular para uso sem internet.</p><p id="serverState">Atualizações automáticas enquanto o aplicativo estiver aberto.</p></div></div>
 </section>
 
+
+<section id="buddySettings" aria-label="Configurações do Buddy" role="dialog" aria-modal="true">
+ <div class="settings-card"><div class="hub-head"><div><h2 class="settings-title">BUDDY // CONFIG</h2><div class="hub-note">Ajustes visuais salvos neste aparelho</div></div><button class="action-btn" id="settingsClose">FECHAR ×</button></div>
+ <label class="settings-row"><span>Modo descanso<small>Escurece a tela para usar na cabeceira</small></span><input id="setNight" type="checkbox"></label>
+ <label class="settings-row"><span>Efeitos CRT<small>Linhas de monitor retrô e brilho de fósforo</small></span><input id="setCrt" type="checkbox" checked></label>
+ <label class="settings-row"><span>Animações do mascote<small>Piscar, brilho e transições de humor</small></span><input id="setMotion" type="checkbox" checked></label>
+ <label class="settings-row"><span>Relógio com segundos<small>Mostra os segundos discretamente</small></span><input id="setSeconds" type="checkbox"></label>
+ <div class="settings-section"><div class="settings-label">TEMA PREDEFINIDO</div><select id="setTheme" class="theme-select"><option value="retro">Fósforo verde · clássico</option><option value="amber">Âmbar · terminal antigo</option><option value="ice">Azul · computador sci-fi</option><option value="mono">Monocromático · CRT</option><option value="custom">Personalizado</option></select></div>
+ <div class="settings-section"><div class="settings-label">AJUSTE FINO</div><label class="fine-row">Cor principal <input id="setAccent" type="color" value="#8cff9b"></label><label class="fine-row">Brilho <input id="setGlow" type="range" min="0" max="100" value="55"></label><label class="fine-row">Intensidade CRT <input id="setScan" type="range" min="0" max="100" value="42"></label><label class="fine-row">Velocidade das animações <input id="setSpeed" type="range" min="50" max="150" value="100"></label></div>
+ <label class="settings-row"><span>Eventos espontâneos<small>O Buddy faz pequenas ações e comentários aleatórios</small></span><input id="setEvents" type="checkbox" checked></label>
+ <div class="hub-tools"><span>LOCAL: SOROCABA · SP</span><button class="action-btn" id="settingsDone">PRONTO</button></div>
+ <p class="hub-note">As preferências ficam salvas no navegador deste celular. Clima, câmbio e notícias continuam usando as mesmas fontes de dados.</p></div>
+</section>
 
 <script>
 (function(){
@@ -202,6 +262,7 @@ function dataTime(){var d=DATA&&DATA.updatedAt?new Date(DATA.updatedAt).getTime(
 
 /* ============ render ============ */
 function tile(id,label,body){$(id).innerHTML='<div class="tag"><b>// '+label+'</b></div>'+body}
+function weatherGlyph(desc){var x=String(desc||"").toLowerCase();if(x.indexOf("trovo")>=0)return "⚡";if(x.indexOf("chuva")>=0||x.indexOf("pancada")>=0||x.indexOf("garoa")>=0)return "☂";if(x.indexOf("neblina")>=0)return "≋";if(x.indexOf("nublado")>=0||x.indexOf("nuvem")>=0)return "☁";return "☼"}
 function renderWeather(d){
   var w=d&&d.weather;
   if(!w){tile("#tWeather","clima",'<div class="s">sem dados de clima</div>');return}
@@ -214,7 +275,7 @@ function renderWeather(d){
     l2='<b>'+(di.isToday?"hoje":di.short)+'</b> '+Math.round(p.min)+"°–"+Math.round(p.max)+'° · chuva <b>'+Math.round(p.rain)+'%</b>';
     if(!cur)sub=p.desc||"";
   }
-  tile("#tWeather","clima",'<div class="v">'+big+'°</div><div class="s">'+esc(sub)+'</div><div class="s">'+l2+'</div>');
+  tile("#tWeather","clima · sorocaba",'<div class="weather-icon">'+weatherGlyph(cur&&cur.desc||p&&p.desc||"")+'</div><div class="v">'+big+'°</div><div class="s">'+esc(sub)+'</div><div class="s">'+l2+'</div>');
 }
 function renderFx(d){
   var f=d&&d.fx,u=f&&f.filter(function(x){return x.code==="USD"})[0];
@@ -365,6 +426,26 @@ face.addEventListener("keydown",function(e){if(e.key===" "||e.key==="Enter"){e.p
 face.addEventListener("keyup",function(e){if(e.key===" "||e.key==="Enter")endPet()});
 $("#sayBox").addEventListener("click",brief);
 $("#learn").innerHTML="reforços <b>"+net.bonds+"</b>";
+// Eventos espontâneos locais: pequenos gestos e falas, sem IA ou serviços externos.
+var eventLines=[
+ {m:"curioso",s:"alert",t:"Tem alguma coisa acontecendo por aí?"},
+ {m:"animado",s:"happy",t:"Estou de bom humor hoje."},
+ {m:"observando",s:"focus",t:"Só estou monitorando tudo por aqui."},
+ {m:"sonolento",s:"sleep",t:"Acho que vou tirar uma soneca..."},
+ {m:"brincalhão",s:"happy",t:"Ei! Não esquece de mim."},
+ {m:"atento",s:"focus",t:"Tudo tranquilo no sistema."},
+ {m:"surpreso",s:"alert",t:"Bip! Detectei uma mudança no ambiente."}
+];
+var eventTimer=null,eventBackTimer=null;
+function spontaneousEvent(){
+ if(!pref.events||document.hidden||pref.night)return;
+ var e=eventLines[Math.floor(Math.random()*eventLines.length)];
+ state=e.s;stateSince=performance.now();face.className="face s-"+e.s;$("#mood").textContent=e.m+" · espontâneo";
+ say(e.t);$("#eventIndicator").textContent="EVENTO ALEATÓRIO // "+e.m.toUpperCase();
+ clearTimeout(eventBackTimer);eventBackTimer=setTimeout(function(){state="neutral";stateSince=performance.now();face.className="face s-neutral";$("#mood").textContent="calmo · observando";$("#eventIndicator").textContent="PET CORE // ATIVO"},9000);
+}
+function scheduleEvent(){clearTimeout(eventTimer);if(pref.events)eventTimer=setTimeout(function(){spontaneousEvent();scheduleEvent()},45000+Math.random()*75000)}
+
 (function blink(){
   var eyes=document.querySelectorAll(".eye");
   if(state!=="sleep"&&state!=="happy"){eyes.forEach(function(e){e.classList.add("blink")});setTimeout(function(){eyes.forEach(function(e){e.classList.remove("blink")})},130)}
@@ -383,14 +464,41 @@ setInterval(function(){if(net.bonds)savePet()},8000);
 var lastHour=-1;
 function tick(){
   var n=new Date();
-  $("#clock").textContent=pad(n.getHours())+":"+pad(n.getMinutes());
+  $("#clock").textContent=pad(n.getHours())+":"+pad(n.getMinutes())+(store("buddy.pref.seconds")?":"+pad(n.getSeconds()):"");
   $("#date").textContent=DS[n.getDay()]+", "+n.getDate()+" "+MONTHS[n.getMonth()];
   var h=n.getHours();document.body.classList.toggle("night",h>=23||h<6);
   if(lastHour!==-1&&h!==lastHour&&merged())brief();
   lastHour=h;
   renderStatus();
 }
-tick();setInterval(tick,15000);
+tick();setInterval(tick,1000);
+/* Preferências visuais */
+var pref={night:!!store("buddy.pref.night"),crt:store("buddy.pref.crt")!==false,motion:store("buddy.pref.motion")!==false,seconds:!!store("buddy.pref.seconds"),theme:store("buddy.pref.theme")||"retro",accent:store("buddy.pref.accent")||"#8cff9b",glow:store("buddy.pref.glow")==null?55:store("buddy.pref.glow"),scan:store("buddy.pref.scan")==null?42:store("buddy.pref.scan"),speed:store("buddy.pref.speed")==null?100:store("buddy.pref.speed"),events:store("buddy.pref.events")!==false};
+function applyPrefs(){
+ document.body.classList.toggle("dim-mode",pref.night);document.body.classList.toggle("no-crt",!pref.crt);document.body.classList.toggle("no-motion",!pref.motion);
+ document.body.dataset.theme=pref.theme==="custom"?"retro":pref.theme;document.body.classList.toggle("custom-theme",pref.theme==="custom");document.documentElement.style.setProperty("--custom-accent",pref.accent);document.documentElement.style.setProperty("--glow",(pref.glow/100*4).toFixed(2)+"vh");document.documentElement.style.setProperty("--scan",pref.crt?pref.scan/100:0);document.documentElement.style.setProperty("--speed",(pref.speed/100)+"s");
+ $("#nightToggle").setAttribute("aria-pressed",String(pref.night));$("#nightToggle").textContent=pref.night?"MODO CLARO":"MODO NOITE";
+ ["Night","Crt","Motion","Seconds","Events"].forEach(function(k){var key=k.toLowerCase(),el=$("#set"+k);if(el)el.checked=!!pref[key]});
+ $("#setTheme").value=pref.theme;$("#setAccent").value=pref.accent;$("#setGlow").value=pref.glow;$("#setScan").value=pref.scan;$("#setSpeed").value=pref.speed;
+ Object.keys(pref).forEach(function(k){store("buddy.pref."+k,pref[k])});scheduleEvent();tick()
+}
+$("#nightToggle").addEventListener("click",function(){pref.night=!pref.night;applyPrefs()});
+$("#settingsOpen").addEventListener("click",function(){$("#buddySettings").classList.add("open")});
+function closeSettings(){$("#buddySettings").classList.remove("open")}
+$("#settingsClose").addEventListener("click",closeSettings);$("#settingsDone").addEventListener("click",closeSettings);
+$("#setNight").addEventListener("change",function(){pref.night=this.checked;applyPrefs()});
+$("#setCrt").addEventListener("change",function(){pref.crt=this.checked;applyPrefs()});
+$("#setMotion").addEventListener("change",function(){pref.motion=this.checked;applyPrefs()});
+$("#setSeconds").addEventListener("change",function(){pref.seconds=this.checked;applyPrefs()});
+$("#setEvents").addEventListener("change",function(){pref.events=this.checked;applyPrefs()});
+$("#setTheme").addEventListener("change",function(){pref.theme=this.value;applyPrefs()});
+$("#setAccent").addEventListener("input",function(){pref.accent=this.value;pref.theme="custom";applyPrefs()});
+$("#setGlow").addEventListener("input",function(){pref.glow=+this.value;applyPrefs()});
+$("#setScan").addEventListener("input",function(){pref.scan=+this.value;applyPrefs()});
+$("#setSpeed").addEventListener("input",function(){pref.speed=+this.value;applyPrefs()});
+$("#buddySettings").addEventListener("click",function(e){if(e.target===$("#buddySettings"))closeSettings()});
+applyPrefs();
+
 var wl=null;
 function keepAwake(){
   try{if(navigator.wakeLock&&document.visibilityState==="visible"){navigator.wakeLock.request("screen").then(function(s){wl=s}).catch(function(){})}}catch(e){}
@@ -454,8 +562,8 @@ function updateNews(force){
 }
 function updateWeather(force){
   if(!force&&weatherUpdated&&Date.now()-weatherUpdated<30*60e3)return Promise.resolve();
-  /* Coordenadas padrão: São Paulo. Altere latitude/longitude para sua cidade, se desejar. */
-  var url="https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=America%2FSao_Paulo&forecast_days=3";
+  /* Sorocaba - SP */
+  var url="https://api.open-meteo.com/v1/forecast?latitude=-23.5015&longitude=-47.4526&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=America%2FSao_Paulo&forecast_days=3";
   return jget(url).then(function(j){
     LIVE.weather={current:{temp:j.current.temperature_2m,feels:j.current.apparent_temperature,humidity:j.current.relative_humidity_2m,desc:WMO[j.current.weather_code]||""},days:j.daily.time.map(function(d,i){return {date:d,min:j.daily.temperature_2m_min[i],max:j.daily.temperature_2m_max[i],rain:j.daily.precipitation_probability_max[i]||0,desc:WMO[j.daily.weather_code[i]]||""}})};
     weatherUpdated=Date.now();writeCache(WEATHER_KEY,{value:LIVE.weather,at:weatherUpdated});renderAll();if(!briefedOnce){briefedOnce=true;brief()}
