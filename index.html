@@ -1,0 +1,491 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#040906"><meta name="description" content="Buddy OS — pet digital e relógio de cabeceira"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="buddy-icon.svg" type="image/svg+xml"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"><title>Buddy OS Lite</title><style>:root{color-scheme:dark;box-sizing:border-box}*{box-sizing:border-box}html,body{min-height:100%;margin:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<style>
+/* Layout: tela única horizontal de cabeceira. Esquerda: Buddy (olhos + cérebro). Direita: relógio grande, fala do Buddy, e três blocos (clima, dólar, manchete). Nada rola. */
+:root{
+  --bg:#040906; --panel:#08130c; --panel2:#0c1c12; --line:#1a3a27;
+  --g:#53f27a; --g2:#2fa354; --fg:#d4f3dc; --mute:#6f9a80;
+  --amber:#ffb454; --red:#ff6b73; --cyan:#7fe8d6;
+  --display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+html{background:var(--bg)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:500 clamp(11px,3.6vh,16px)/1.4 var(--mono);margin:0;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;transition:filter 1.5s}
+body.night{filter:brightness(.5)}
+.app{height:100%;display:grid;grid-template-columns:36% 1fr;gap:2.4vh;
+  padding:2.4vh max(2.4vh,env(safe-area-inset-right,0px)) 2.4vh max(2.4vh,env(safe-area-inset-left,0px))}
+.panel{position:relative;background:var(--panel);border:1px solid var(--line);min-width:0;min-height:0}
+.panel::before,.panel::after{content:"";position:absolute;width:1.8vh;height:1.8vh;border:2px solid var(--g);pointer-events:none;z-index:4}
+.panel::before{top:-2px;left:-2px;border-right:0;border-bottom:0}
+.panel::after{bottom:-2px;right:-2px;border-left:0;border-top:0}
+.tag{font-size:.72em;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.tag b{color:var(--g);font-weight:500}
+
+/* buddy */
+.buddy{display:grid;grid-template-rows:1fr auto;overflow:hidden}
+.face{position:relative;display:grid;place-items:center;background:#020503;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;min-height:0}
+.face::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);pointer-events:none}
+.eyes{display:flex;gap:7vh;align-items:center;height:20vh;margin-top:-4vh}
+.eye{width:11vh;height:7.5vh;background:var(--g);border-radius:3.4vh;box-shadow:0 0 5vh rgba(83,242,122,.55);
+  border:0 solid var(--g);transition:height .25s,width .25s,border-radius .25s,background .25s,transform .12s}
+.eye.blink{transform:scaleY(.08)}
+.s-happy .eye{height:5.4vh;width:12vh;background:transparent;border-top:1.8vh solid var(--g);border-radius:50% 50% 0 0;box-shadow:0 -1.4vh 4vh rgba(83,242,122,.45)}
+.s-alert .eye{height:11vh;width:7.4vh;border-radius:3vh;background:var(--amber);box-shadow:0 0 5vh rgba(255,180,84,.6)}
+.s-sleep .eye{height:1.3vh;width:11vh;border-radius:1vh}
+.s-focus .eye{height:6vh;width:12.5vh;border-radius:1.5vh}
+.mood{position:absolute;left:1.6vh;top:1.4vh;z-index:2}
+.mood .m1{color:var(--g);letter-spacing:.16em;text-transform:uppercase;font-size:.78em}
+.hint{position:absolute;left:0;right:0;bottom:1.2vh;text-align:center;z-index:2;color:var(--mute);font-size:.68em;letter-spacing:.14em;text-transform:uppercase}
+.pop{position:absolute;top:56%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-weight:700;font-size:1.5em;color:var(--g);text-shadow:0 0 12px var(--g);background:#020503cc;border:1px solid var(--g);padding:.1em .6em;opacity:0;pointer-events:none;z-index:3;white-space:nowrap}
+.pop.go{animation:pop .9s ease-out}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-30%)}15%{opacity:1;transform:translate(-50%,-50%)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-110%)}}
+canvas{display:block;width:100%;height:11vh;background:#020503;border-top:1px solid var(--line)}
+.brainbar{display:flex;justify-content:space-between;gap:1vh;padding:.7vh 1.4vh;border-top:1px solid var(--line)}
+
+/* direita */
+.right{display:grid;grid-template-rows:auto 1fr auto;gap:2.4vh;min-width:0;min-height:0}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:2vh}
+.clock{font:700 clamp(40px,27vh,150px)/.85 var(--display);color:var(--g);letter-spacing:-.02em;text-shadow:0 0 3vh rgba(83,242,122,.35);font-variant-numeric:tabular-nums}
+.date{text-align:right;padding-bottom:.6vh}
+.date .d1{font:600 1.5em var(--display);letter-spacing:.1em;text-transform:uppercase}
+.stat{display:flex;gap:.8vh;align-items:center;justify-content:flex-end;margin-top:.6vh}
+.dot{width:1.6vh;height:1.6vh;border-radius:50%;background:var(--amber);box-shadow:0 0 1.4vh var(--amber)}
+.dot.live{background:var(--g);box-shadow:0 0 1.4vh var(--g)}
+.dot.off{background:var(--red);box-shadow:0 0 1.4vh var(--red)}
+.say{padding:1.8vh 2vh;display:flex;flex-direction:column;justify-content:center;gap:1vh;overflow:hidden}
+.say p{margin:0;font-size:1.12em;line-height:1.45;text-wrap:pretty}
+.say p::after{content:"▌";color:var(--g);animation:cur 1s steps(2) infinite}
+@keyframes cur{50%{opacity:0}}
+.chips{display:flex;gap:1vh;flex-wrap:wrap}
+.chip{font-size:.72em;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--g2);color:var(--g);padding:.2vh 1vh}
+.chip.w{border-color:var(--amber);color:var(--amber)}
+.chip.r{border-color:var(--red);color:var(--red)}
+.tiles{display:grid;grid-template-columns:1fr 1fr 1.7fr;gap:2.4vh}
+.tile{padding:1.6vh 1.8vh;display:flex;flex-direction:column;gap:.5vh;overflow:hidden;min-height:22vh}
+.tile .v{font:700 clamp(22px,10.5vh,64px)/1 var(--display);font-variant-numeric:tabular-nums}
+.tile .v small{font-size:.38em;color:var(--mute);font-weight:500;margin-left:.2em}
+.tile .s{font-size:.8em;color:var(--mute);line-height:1.3}
+.tile .s b{color:var(--fg);font-weight:500}
+.up{color:var(--red)} .dn{color:var(--g)}
+.news .nt{display:inline-block;font-size:.65em;letter-spacing:.14em;text-transform:uppercase;background:var(--g);color:var(--bg);padding:0 .6em;width:fit-content}
+.news .nt.m{background:var(--amber)} .news .nt.w{background:var(--cyan)}
+.news .h{font-size:1em;line-height:1.35;text-wrap:pretty;transition:opacity .5s;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.news .src{margin-top:auto;display:flex;justify-content:space-between;color:var(--mute);font-size:.7em}
+.fade{opacity:0}
+
+
+/* ============ evolução PWA / central do Buddy ============ */
+.head{position:relative}
+.head-actions{display:flex;gap:8px;align-items:center}
+.action-btn{border:1px solid var(--g2);background:#07140b;color:var(--g);font:600 11px var(--mono);letter-spacing:.1em;padding:10px 12px;cursor:pointer}
+.action-btn:active{background:var(--g);color:var(--bg)}
+#buddyHub{position:fixed;inset:0;z-index:80;background:rgba(2,8,4,.97);display:none;grid-template-rows:auto auto 1fr;gap:12px;padding: max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));overflow:auto}
+#buddyHub.open{display:grid}
+.hub-head{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.hub-title{font:700 22px var(--display);color:var(--g);letter-spacing:.08em}
+.hub-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.hub-tab{border:1px solid var(--line);background:var(--panel);color:var(--mute);padding:9px 14px;font:600 11px var(--mono);letter-spacing:.08em}
+.hub-tab.active{border-color:var(--g);color:var(--g)}
+.hub-view{display:none;min-height:0}
+.hub-view.active{display:block}
+.hub-tools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0;color:var(--mute);font-size:11px}
+.feed-list{display:grid;gap:9px}
+.feed-item{border:1px solid var(--line);background:var(--panel);padding:12px;display:grid;gap:6px}
+.feed-meta{display:flex;justify-content:space-between;gap:8px;color:var(--mute);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.feed-tag{color:var(--g)}
+.feed-item a{color:var(--fg);font-weight:600;text-decoration:none;line-height:1.35}
+.feed-item p{margin:0;color:var(--mute);font-size:12px;line-height:1.5}
+#buddyChat{display:grid;grid-template-rows:1fr auto;min-height:55vh;max-height:72vh;border:1px solid var(--line);background:var(--panel)}
+.chat-msg{max-width:90%;padding:10px 12px;border:1px solid var(--line);background:#0b1c10;white-space:pre-wrap;line-height:1.45;font-size:13px}
+.hub-note{color:var(--mute);font-size:11px;line-height:1.5}
+@media (orientation:portrait){
+  body{overflow:auto;min-height:100%;font-size:12px}
+  .app{height:auto;min-height:100dvh;grid-template-columns:1fr;grid-template-rows:minmax(38vh,1fr) auto;gap:12px;padding:12px}
+  .buddy{min-height:38vh;grid-template-rows:1fr auto}
+  .eyes{gap:12vw;height:15vh;margin-top:0}.eye{width:18vw;height:7vh}
+  canvas{height:7vh}
+  .right{grid-template-rows:auto auto auto;gap:12px}
+  .clock{font-size:clamp(52px,17vw,100px)}
+  .say{min-height:100px}
+  .tiles{grid-template-columns:1fr 1fr;gap:10px}
+  .news{grid-column:1/-1;min-height:130px}
+  .tile{min-height:115px;padding:12px}
+  #rot{display:none}
+  .head-actions{flex-direction:column;align-items:flex-end}
+  .action-btn{padding:8px;font-size:10px}
+  #buddyHub{padding: max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))}
+}
+
+#rot{display:none;position:fixed;inset:0;z-index:50;background:var(--bg);color:var(--g);place-items:center;text-align:center;font:600 18px var(--display);letter-spacing:.1em;padding:24px}
+@media (orientation:portrait){#rot{display:none}}
+@media (prefers-reduced-motion:reduce){.say p::after,.pop.go{animation:none}.eye,body{transition:none}}
+</style>
+
+<div id="rot">GIRE O CELULAR<br>PARA O MODO HORIZONTAL</div>
+<div class="app">
+  <section class="panel buddy">
+    <div class="face s-neutral" id="face" role="button" tabindex="0" aria-label="Toque e segure para fazer carinho no Buddy">
+      <div class="mood tag"><b id="bstat">online</b><div class="m1" id="mood">calmo · observando</div></div>
+      <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+      <div class="hint">segure para carinho</div>
+      <div class="pop" id="pop">+1 RECOMPENSA</div>
+    </div>
+    <div>
+      <canvas id="raster" width="400" height="96" aria-label="Disparos dos neurônios"></canvas>
+      <div class="brainbar tag"><span><b id="nN">96</b> neurônios</span><span id="learn">reforços <b>0</b></span></div>
+    </div>
+  </section>
+
+  <div class="right">
+    <div class="head">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date"><div class="d1" id="date">—</div><div class="stat tag"><span class="dot" id="dot"></span><span id="mode">…</span></div></div><div class="head-actions"><button class="action-btn" id="openHub">CENTRAL DO BUDDY</button><button class="action-btn" id="installPwa" hidden>INSTALAR</button></div>
+    </div>
+
+    <section class="panel say" id="sayBox">
+      <p id="say"></p>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <div class="tiles">
+      <section class="panel tile" id="tWeather"><div class="tag"><b>// clima</b></div><div class="s">aguardando dados…</div></section>
+      <section class="panel tile" id="tFx"><div class="tag"><b>// dólar</b></div><div class="s">aguardando dados…</div></section>
+      <section class="panel tile news" id="tNews"><div class="tag"><b>// manchete</b></div><div class="s">aguardando dados…</div></section>
+    </div>
+  </div>
+</div>
+
+
+<section id="buddyHub" aria-label="Central do Buddy">
+  <div class="hub-head"><div><div class="hub-title">BUDDY // CENTRAL</div><div class="hub-note">Tecnologia · Fórmula 1 · Mundo · Economia · Brasil</div></div><button class="action-btn" id="closeHub">FECHAR ×</button></div>
+  <nav class="hub-tabs"><button class="hub-tab active" data-tab="feed">NOTÍCIAS</button><button class="hub-tab" data-tab="about">SISTEMA</button></nav>
+  <div class="hub-view active" id="view-feed"><div class="hub-tools"><span id="feedStatus">Carregando notícias…</span><button class="action-btn" id="refreshFeed">ATUALIZAR</button></div><div id="feedList" class="feed-list"><div class="hub-note">Buscando notícias…</div></div></div>
+  <div class="hub-view" id="view-about"><div class="feed-item"><div class="feed-meta"><span class="feed-tag">BUDDY OS LITE</span><span>FUNCIONAMENTO LOCAL</span></div><p>O Buddy não usa inteligência artificial. O pet, o humor e as reações são controlados pelo próprio aplicativo.</p><p>Notícias, clima e câmbio são consultados diretamente de serviços públicos. Os últimos dados ficam salvos neste celular para uso sem internet.</p><p id="serverState">Atualizações automáticas enquanto o aplicativo estiver aberto.</p></div></div>
+</section>
+
+
+<script>
+(function(){
+"use strict";
+var EMBED=null;/*EMBED*/
+var $=function(s){return document.querySelector(s)};
+var REDUCED=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+var nf=function(n,d){return Number(n).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d})};
+var sign=function(n){return (n>0?"+":n<0?"−":"")+nf(Math.abs(n),2)+"%"};
+var DAYS=["domingo","segunda","terça","quarta","quinta","sexta","sábado"], DS=["dom","seg","ter","qua","qui","sex","sáb"], MONTHS=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+var WMO={0:"céu limpo",1:"poucas nuvens",2:"parcialmente nublado",3:"nublado",45:"neblina",48:"neblina",51:"garoa fraca",53:"garoa",55:"garoa forte",61:"chuva fraca",63:"chuva",65:"chuva forte",80:"pancadas fracas",81:"pancadas de chuva",82:"pancadas fortes",95:"trovoadas",96:"trovoadas c/ granizo",99:"trovoadas c/ granizo"};
+var pad=function(n){return String(n).padStart(2,"0")};
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+/* ============ dados ============ */
+var DATA=EMBED, LIVE={weather:null,fx:null,news:null,at:0}, briefedOnce=false;
+function merged(){
+  if(!DATA&&!LIVE.weather&&!LIVE.fx&&!LIVE.news)return null;
+  var d=Object.assign({},DATA||{});
+  if(LIVE.weather)d.weather=LIVE.weather;
+  if(LIVE.fx)d.fx=LIVE.fx;
+  if(LIVE.news)d.news=LIVE.news;
+  return d;
+}
+function localISO(){var n=new Date();return n.getFullYear()+"-"+pad(n.getMonth()+1)+"-"+pad(n.getDate())}
+function primaryDay(days){var t=localISO();for(var i=0;i<days.length;i++)if(days[i].date>=t)return days[i];return days[0]}
+function dayInfo(iso){var p=String(iso).split("-"),dt=new Date(+p[0],+p[1]-1,+p[2]);return {name:DAYS[dt.getDay()],short:DS[dt.getDay()]+" "+p[2]+"/"+p[1],isToday:iso===localISO()}}
+function ageText(t){
+  var m=Math.round((Date.now()-t)/60000);
+  if(isNaN(m))return "";if(m<2)return "agora";if(m<90)return m+" min atrás";if(m<48*60)return Math.round(m/60)+" h atrás";return Math.round(m/1440)+" dias atrás";
+}
+function dataTime(){var d=DATA&&DATA.updatedAt?new Date(DATA.updatedAt).getTime():0;return d}
+
+/* ============ render ============ */
+function tile(id,label,body){$(id).innerHTML='<div class="tag"><b>// '+label+'</b></div>'+body}
+function renderWeather(d){
+  var w=d&&d.weather;
+  if(!w){tile("#tWeather","clima",'<div class="s">sem dados de clima</div>');return}
+  var p=w.days&&w.days.length?primaryDay(w.days):null, cur=w.current;
+  var big=cur?Math.round(cur.temp):(p?Math.round(p.max):"--");
+  var sub="",l2="";
+  if(cur){sub=(cur.desc||"")+(cur.feels!=null?" · sens. "+Math.round(cur.feels)+"°":"");}
+  if(p){
+    var di=dayInfo(p.date);
+    l2='<b>'+(di.isToday?"hoje":di.short)+'</b> '+Math.round(p.min)+"°–"+Math.round(p.max)+'° · chuva <b>'+Math.round(p.rain)+'%</b>';
+    if(!cur)sub=p.desc||"";
+  }
+  tile("#tWeather","clima",'<div class="v">'+big+'°</div><div class="s">'+esc(sub)+'</div><div class="s">'+l2+'</div>');
+}
+function renderFx(d){
+  var f=d&&d.fx,u=f&&f.filter(function(x){return x.code==="USD"})[0];
+  if(!u){tile("#tFx","dólar",'<div class="s">sem cotação</div>');return}
+  var cls=u.pct>0?"up":u.pct<0?"dn":"";
+  var l2=d.market&&d.market.ibov?'Ibovespa <b class="'+(d.market.ibovPct>=0?"dn":"up")+'">'+sign(d.market.ibovPct)+'</b>':"";
+  var eur=f.filter(function(x){return x.code==="EUR"})[0];
+  if(eur)l2+=(l2?" · ":"")+'euro <b>R$ '+nf(eur.bid,2)+'</b>';
+  tile("#tFx","dólar",'<div class="v">'+nf(u.bid,2)+'<small>R$</small></div><div class="s"><b class="'+cls+'">'+(u.pct>0?"▲ ":u.pct<0?"▼ ":"")+sign(u.pct)+'</b> no dia</div><div class="s">'+l2+'</div>');
+}
+var newsIdx=0,newsTimer=null;
+function showNews(first){
+  var d=merged(),n=d&&d.news;
+  if(!n||!n.length){tile("#tNews","manchete",'<div class="s">sem manchetes</div>');return}
+  var x=n[newsIdx%n.length],c=x.tag==="Mercado"?"m":x.tag==="Mundo"?"w":"";
+  var html='<div class="tag"><b>// manchete '+((newsIdx%n.length)+1)+'/'+n.length+'</b></div><span class="nt '+c+'">'+esc(x.tag||"BR")+'</span><div class="h" id="nh">'+esc(x.title)+'</div><div class="src"><span>'+esc(x.source||"")+'</span></div>';
+  var el=$("#tNews");
+  if(first||REDUCED){el.innerHTML=html;return}
+  var h=$("#nh");if(h)h.classList.add("fade");
+  setTimeout(function(){el.innerHTML=html;var h2=$("#nh");if(h2){h2.classList.add("fade");void h2.offsetWidth;h2.classList.remove("fade")}},450);
+}
+function startNews(){
+  clearInterval(newsTimer);newsIdx=0;showNews(true);
+  newsTimer=setInterval(function(){newsIdx++;showNews(false)},9000);
+}
+function renderChips(d){
+  var c=[],w=d.weather,p=w&&w.days&&w.days.length?primaryDay(w.days):null;
+  if(p){
+    if(p.rain>=60)c.push(["chuva "+Math.round(p.rain)+"%","w"]);
+    if(p.max>=32)c.push(["calor "+Math.round(p.max)+"°","r"]);
+    if(p.min<=12)c.push(["frio "+Math.round(p.min)+"°","w"]);
+  }
+  var u=(d.fx||[]).filter(function(x){return x.code==="USD"})[0];
+  if(u&&Math.abs(u.pct)>=1)c.push(["dólar "+sign(u.pct),u.pct>0?"r":""]);
+  $("#chips").innerHTML=c.map(function(x){return '<span class="chip '+x[1]+'">'+x[0]+'</span>'}).join("");
+  return c;
+}
+function renderStatus(){
+  var d=merged(),dot=$("#dot"),mode=$("#mode");
+  if(!d){dot.className="dot off";mode.textContent="sem dados";return}
+  var latest=Math.max(newsUpdated||0,weatherUpdated||0,fxUpdated||0);
+  var live=latest&&(Date.now()-latest)<2.5*3600e3;
+  if(live){dot.className="dot live";mode.textContent="atualizado · "+pad(new Date(latest).getHours())+":"+pad(new Date(latest).getMinutes())}
+  else{var t=dataTime(),stale=!t||(Date.now()-t)>14*3600e3;dot.className="dot "+(stale?"off":"");mode.textContent=stale?"dados antigos":"snapshot "+ageText(t)}
+}
+function renderAll(){
+  var d=merged();
+  renderStatus();
+  if(!d)return;
+  renderWeather(d);renderFx(d);renderChips(d);
+  var sig=JSON.stringify((d.news||[]).map(function(x){return x.title}));
+  if(sig!==renderAll.sig){renderAll.sig=sig;startNews()}
+  var ev=0,u=(d.fx||[]).filter(function(x){return x.code==="USD"})[0];
+  if(u&&Math.abs(u.pct)>=1)ev+=0.6;
+  var p=d.weather&&d.weather.days&&d.weather.days.length?primaryDay(d.weather.days):null;
+  if(p&&p.rain>=60)ev+=0.5;
+  if(ev)net.dataLevel=Math.max(net.dataLevel,Math.min(ev,1));
+}
+
+/* ============ fala ============ */
+function greeting(){var h=new Date().getHours();return h<5?"Madrugada":h<12?"Bom dia":h<18?"Boa tarde":"Boa noite"}
+function buildBrief(){
+  var d=merged();
+  if(!d)return greeting()+"! Ainda estou buscando as informações do dia.";
+  var t=[greeting()+"!"],w=d.weather,p=w&&w.days&&w.days.length?primaryDay(w.days):null;
+  if(p){
+    var di=dayInfo(p.date),lab=di.isToday?"Hoje":di.name==="sábado"||di.name==="domingo"?"No "+di.name:"Na "+di.name;
+    t.push(lab+": "+Math.round(p.min)+"° a "+Math.round(p.max)+"°, "+(p.desc||"").toLowerCase()+".");
+    if(p.rain>=60)t.push("Leva guarda-chuva.");else if(p.max>=32)t.push("Vai esquentar, bebe água.");else if(p.min<=12)t.push("Vai estar frio, leva casaco.");
+  }
+  var u=(d.fx||[]).filter(function(x){return x.code==="USD"})[0];
+  if(u)t.push("Dólar a R$ "+nf(u.bid,2)+" ("+sign(u.pct)+")"+(Math.abs(u.pct)>=1?", movimento forte.":"."));
+  return t.join(" ");
+}
+var typeTok=0;
+function say(text){
+  var el=$("#say"),tok=++typeTok;
+  if(REDUCED){el.textContent=text;return}
+  el.textContent="";var i=0;
+  (function step(){if(tok!==typeTok)return;i+=2;el.textContent=text.slice(0,i);if(i<text.length)setTimeout(step,18)})();
+}
+function brief(){net.dataLevel=Math.max(net.dataLevel,0.3);say(buildBrief())}
+
+/* ============ rede neural de disparos (LIF) ============ */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+var N=96, POPS={happy:[0,8],alert:[8,16],focus:[16,24],sleep:[24,32]};
+var IN={touch:[32,44],data:[44,56],clock:[56,68]};
+var net=(function(){
+  var rnd=mulberry(7),pre=[],post=[],w=[],i,j;
+  function add(a,b,wt){pre.push(a);post.push(b);w.push(wt)}
+  for(i=0;i<N;i++)for(j=0;j<N;j++){if(i===j||rnd()>0.06)continue;var inh=rnd()<0.2;add(i,j,inh?-(0.12+rnd()*0.15):(0.1+rnd()*0.2))}
+  function wire(g,pop,k,wt){for(var a=g[0];a<g[1];a++)for(var c=0;c<k;c++)add(a,pop[0]+Math.floor(rnd()*(pop[1]-pop[0])),wt*(0.8+rnd()*0.4))}
+  wire(IN.touch,POPS.happy,3,0.3);wire(IN.data,POPS.alert,3,0.36);wire(IN.data,POPS.focus,2,0.28);wire(IN.clock,POPS.sleep,3,0.3);wire(IN.clock,POPS.focus,1,0.12);
+  var W=Float32Array.from(w),saved=store("buddy.v1"),bonds=0;
+  if(saved&&saved.w&&saved.w.length===W.length){for(i=0;i<W.length;i++)W[i]=saved.w[i];bonds=saved.bonds||0}
+  var happyIdx=[];for(i=0;i<post.length;i++)if(post[i]<POPS.happy[1]&&w[i]>0)happyIdx.push(i);
+  return {pre:Int16Array.from(pre),post:Int16Array.from(post),W:W,v:new Float32Array(N),spk:new Uint8Array(N),tr:new Float32Array(N),ref:new Uint8Array(N),
+    rate:{happy:0,alert:0,focus:0,sleep:0},bonds:bonds,dataLevel:0,touching:false,happyIdx:happyIdx};
+})();
+
+function sleepLevel(){var h=new Date().getHours()+new Date().getMinutes()/60;if(h>=22||h<6)return 1;if(h>=21||h<7)return .5;return 0}
+var I=new Float32Array(N);
+function step(){
+  var i,s,n=net;
+  for(i=0;i<N;i++)I[i]=0.035+Math.random()*0.06;
+  if(n.touching)for(i=IN.touch[0];i<IN.touch[1];i++)I[i]+=0.3;
+  if(n.dataLevel>0.01){for(i=IN.data[0];i<IN.data[1];i++)I[i]+=0.28*n.dataLevel;n.dataLevel*=0.997}
+  var sl=sleepLevel();for(i=IN.clock[0];i<IN.clock[1];i++)I[i]+=0.05+0.16*sl;
+  var P=n.pre,Q=n.post,W=n.W,L=W.length;
+  for(s=0;s<L;s++)if(n.spk[P[s]])I[Q[s]]+=W[s];
+  for(i=0;i<N;i++){
+    n.tr[i]*=0.9;
+    if(n.ref[i]>0){n.ref[i]--;n.v[i]=0;n.spk[i]=0;continue}
+    n.v[i]=n.v[i]*0.9+I[i];
+    if(n.v[i]>=1){n.spk[i]=1;n.v[i]=0;n.ref[i]=3;n.tr[i]+=1}else n.spk[i]=0;
+  }
+  if(n.touching){for(var k=0;k<n.happyIdx.length;k++){s=n.happyIdx[k];if(n.spk[Q[s]]&&n.tr[P[s]]>0.2)W[s]=Math.min(0.9,W[s]+0.0012*n.tr[P[s]])}}
+  for(var key in POPS){var c=0;for(i=POPS[key][0];i<POPS[key][1];i++)c+=n.spk[i];n.rate[key]=n.rate[key]*0.985+(c/8)*0.015}
+}
+var cv=$("#raster"),cx=cv.getContext("2d"),COLW=2;
+var popColor=function(i){return i<8?"#53f27a":i<16?"#ffb454":i<24?"#7fe8d6":i<32?"#4a7a8c":i<68?"#2a7a44":"#1f5a35"};
+function drawRaster(){
+  cx.drawImage(cv,-COLW,0);cx.fillStyle="#020503";cx.fillRect(cv.width-COLW,0,COLW,cv.height);
+  var rh=cv.height/N;
+  for(var i=0;i<N;i++)if(net.spk[i]){cx.fillStyle=popColor(i);cx.fillRect(cv.width-COLW,i*rh,COLW-.5,Math.max(1,rh-.2))}
+}
+var NORM=0.30,MOODS={happy:["à vontade","alegre"],alert:["alerta","surpreso"],focus:["atento","focado"],sleep:["sonolento","descansando"],neutral:["calmo","observando"]};
+var state="neutral",stateSince=0;
+function updateMood(now){
+  var best="neutral",bv=0.42,sc={};
+  for(var k in POPS)sc[k]=Math.min(1,net.rate[k]/NORM);
+  if(net.touching)sc.happy+=0.5;
+  for(var k2 in sc)if(sc[k2]>bv){bv=sc[k2];best=k2}
+  if(best!==state&&now-stateSince>600){state=best;stateSince=now;$("#face").className="face s-"+state;$("#mood").textContent=MOODS[state][0]+" · "+MOODS[state][1]}
+}
+var lastPopAt=0;
+function startPet(){
+  if(net.touching)return;net.touching=true;
+  var now=Date.now();
+  if(now-lastPopAt>1500){lastPopAt=now;net.bonds++;var p=$("#pop");p.classList.remove("go");void p.offsetWidth;p.classList.add("go");$("#learn").innerHTML="reforços <b>"+net.bonds+"</b>"}
+}
+function endPet(){net.touching=false;savePet()}
+function savePet(){store("buddy.v1",{w:Array.prototype.map.call(net.W,function(x){return Math.round(x*1000)/1000}),bonds:net.bonds})}
+var face=$("#face");
+face.addEventListener("pointerdown",function(e){e.preventDefault();startPet()});
+["pointerup","pointercancel","pointerleave"].forEach(function(t){face.addEventListener(t,endPet)});
+face.addEventListener("keydown",function(e){if(e.key===" "||e.key==="Enter"){e.preventDefault();startPet()}});
+face.addEventListener("keyup",function(e){if(e.key===" "||e.key==="Enter")endPet()});
+$("#sayBox").addEventListener("click",brief);
+$("#learn").innerHTML="reforços <b>"+net.bonds+"</b>";
+(function blink(){
+  var eyes=document.querySelectorAll(".eye");
+  if(state!=="sleep"&&state!=="happy"){eyes.forEach(function(e){e.classList.add("blink")});setTimeout(function(){eyes.forEach(function(e){e.classList.remove("blink")})},130)}
+  setTimeout(blink,2200+Math.random()*3200);
+})();
+var last=0;
+function frame(t){
+  step();step();drawRaster();
+  if(t-last>500){last=t;updateMood(t)}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+setInterval(function(){if(net.bonds)savePet()},8000);
+
+/* ============ relógio, modo noite, tela sempre acesa ============ */
+var lastHour=-1;
+function tick(){
+  var n=new Date();
+  $("#clock").textContent=pad(n.getHours())+":"+pad(n.getMinutes());
+  $("#date").textContent=DS[n.getDay()]+", "+n.getDate()+" "+MONTHS[n.getMonth()];
+  var h=n.getHours();document.body.classList.toggle("night",h>=23||h<6);
+  if(lastHour!==-1&&h!==lastHour&&merged())brief();
+  lastHour=h;
+  renderStatus();
+}
+tick();setInterval(tick,15000);
+var wl=null;
+function keepAwake(){
+  try{if(navigator.wakeLock&&document.visibilityState==="visible"){navigator.wakeLock.request("screen").then(function(s){wl=s}).catch(function(){})}}catch(e){}
+}
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){keepAwake();if(Date.now()-LIVE.at>3600e3)liveFetch()}});
+var armed=false;
+document.addEventListener("pointerdown",function(){
+  if(armed)return;armed=true;keepAwake();
+  try{var el=document.documentElement;if(el.requestFullscreen&&!document.fullscreenElement)el.requestFullscreen().then(function(){try{screen.orientation.lock("landscape").catch(function(){})}catch(e){}}).catch(function(){})}catch(e){}
+},{once:false});
+
+/* ============ dados online simples, sem IA e sem servidor próprio ============ */
+function jget(url,ms){
+  var ctl=typeof AbortController!=="undefined"?new AbortController():null;
+  var to=setTimeout(function(){if(ctl)ctl.abort()},ms||12000);
+  return fetch(url,ctl?{signal:ctl.signal}:{}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).finally(function(){clearTimeout(to)});
+}
+var TOPIC_FEEDS=[
+  {tag:"Tecnologia",url:"https://g1.globo.com/dynamo/tecnologia/rss2.xml"},
+  {tag:"Fórmula 1",url:"https://www.autosport.com/rss/f1/news/"},
+  {tag:"Mundo",url:"https://g1.globo.com/dynamo/mundo/rss2.xml"},
+  {tag:"Economia",url:"https://g1.globo.com/dynamo/economia/rss2.xml"},
+  {tag:"Brasil",url:"https://g1.globo.com/dynamo/brasil/rss2.xml"}
+];
+var NEWS_KEY="buddy.news.v2", WEATHER_KEY="buddy.weather.v2", FX_KEY="buddy.fx.v2";
+var newsUpdated=0, weatherUpdated=0, fxUpdated=0, refreshBusy=false;
+function readCache(key){try{return JSON.parse(localStorage.getItem(key)||"null")}catch(e){return null}}
+function writeCache(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(e){}}
+var cachedNews=readCache(NEWS_KEY),cachedWeather=readCache(WEATHER_KEY),cachedFx=readCache(FX_KEY);
+if(cachedNews&&cachedNews.items){LIVE.news=cachedNews.items;newsUpdated=cachedNews.at||0}
+if(cachedWeather&&cachedWeather.value){LIVE.weather=cachedWeather.value;weatherUpdated=cachedWeather.at||0}
+if(cachedFx&&cachedFx.value){LIVE.fx=cachedFx.value;fxUpdated=cachedFx.at||0}
+function topicNews(feed){
+  var url="https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(feed.url);
+  return jget(url,15000).then(function(j){
+    if(!j.items||!j.items.length)throw new Error("Feed vazio: "+feed.tag);
+    return j.items.slice(0,12).map(function(x){return {tag:feed.tag,title:String(x.title||"").replace(/\s+/g," ").trim(),source:j.feed&&j.feed.title?j.feed.title:feed.tag,url:x.link||"",description:String(x.description||x.content||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim().slice(0,220),date:x.pubDate||""}}).filter(function(x){return x.title&&x.url});
+  });
+}
+function renderFeed(items){
+  var box=$("#feedList");
+  if(!items||!items.length){box.innerHTML='<div class="hub-note">Não há notícias salvas. Confira a conexão e tente atualizar.</div>';return}
+  box.innerHTML=items.slice(0,35).map(function(x){return '<article class="feed-item"><div class="feed-meta"><span class="feed-tag">'+esc(x.tag||"Notícia")+'</span><span>'+esc(x.source||"")+'</span></div><a href="'+esc(x.url||"#")+'" target="_blank" rel="noopener">'+esc(x.title||"")+'</a><p>'+esc(x.description||"")+'</p></article>'}).join("");
+}
+function updateNews(force){
+  if(refreshBusy)return Promise.resolve();
+  if(!force&&newsUpdated&&Date.now()-newsUpdated<30*60e3)return Promise.resolve();
+  refreshBusy=true;$("#feedStatus").textContent="Buscando notícias…";
+  return Promise.all(TOPIC_FEEDS.map(function(f){return topicNews(f).catch(function(){return []})})).then(function(groups){
+    var all=[].concat.apply([],groups),seen={};
+    all=all.filter(function(x){var k=x.title.toLowerCase();if(seen[k])return false;seen[k]=1;return true});
+    all.sort(function(a,b){return (new Date(b.date).getTime()||0)-(new Date(a.date).getTime()||0)});
+    if(!all.length)throw new Error("Não foi possível acessar os feeds agora.");
+    LIVE.news=all.slice(0,35);newsUpdated=Date.now();writeCache(NEWS_KEY,{items:LIVE.news,at:newsUpdated});renderFeed(LIVE.news);renderAll();
+    $("#feedStatus").textContent="Atualizado às "+pad(new Date(newsUpdated).getHours())+":"+pad(new Date(newsUpdated).getMinutes());
+    var first=LIVE.news[0];if(first){say("Encontrei novidades em "+first.tag+": "+first.title);net.dataLevel=Math.max(net.dataLevel,.5)}
+  }).catch(function(e){
+    if(LIVE.news&&LIVE.news.length){renderFeed(LIVE.news);$("#feedStatus").textContent="Sem conexão. Exibindo notícias salvas."}
+    else{$("#feedStatus").textContent=e.message;renderFeed([])}
+  }).finally(function(){refreshBusy=false});
+}
+function updateWeather(force){
+  if(!force&&weatherUpdated&&Date.now()-weatherUpdated<30*60e3)return Promise.resolve();
+  /* Coordenadas padrão: São Paulo. Altere latitude/longitude para sua cidade, se desejar. */
+  var url="https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=America%2FSao_Paulo&forecast_days=3";
+  return jget(url).then(function(j){
+    LIVE.weather={current:{temp:j.current.temperature_2m,feels:j.current.apparent_temperature,humidity:j.current.relative_humidity_2m,desc:WMO[j.current.weather_code]||""},days:j.daily.time.map(function(d,i){return {date:d,min:j.daily.temperature_2m_min[i],max:j.daily.temperature_2m_max[i],rain:j.daily.precipitation_probability_max[i]||0,desc:WMO[j.daily.weather_code[i]]||""}})};
+    weatherUpdated=Date.now();writeCache(WEATHER_KEY,{value:LIVE.weather,at:weatherUpdated});renderAll();if(!briefedOnce){briefedOnce=true;brief()}
+  }).catch(function(){});
+}
+function updateFx(force){
+  if(!force&&fxUpdated&&Date.now()-fxUpdated<30*60e3)return Promise.resolve();
+  return jget("https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL").then(function(j){
+    var map=[["USDBRL","USD","Dólar"],["EURBRL","EUR","Euro"]];
+    LIVE.fx=map.filter(function(m){return j[m[0]]}).map(function(m){return {code:m[1],name:m[2],bid:parseFloat(j[m[0]].bid),pct:parseFloat(j[m[0]].pctChange)}});
+    fxUpdated=Date.now();writeCache(FX_KEY,{value:LIVE.fx,at:fxUpdated});renderAll();
+  }).catch(function(){});
+}
+function liveFetch(force){return Promise.all([updateNews(!!force),updateWeather(!!force),updateFx(!!force)]).then(function(){renderStatus()})}
+function refreshBuddy(){liveFetch(true)}
+$("#openHub").addEventListener("click",function(){$("#buddyHub").classList.add("open");if(!LIVE.news)updateNews(true)});
+$("#closeHub").addEventListener("click",function(){$("#buddyHub").classList.remove("open")});
+$("#refreshFeed").addEventListener("click",function(){updateNews(true)});
+document.querySelectorAll(".hub-tab").forEach(function(b){b.addEventListener("click",function(){document.querySelectorAll(".hub-tab").forEach(function(x){x.classList.toggle("active",x===b)});document.querySelectorAll(".hub-view").forEach(function(x){x.classList.toggle("active",x.id==="view-"+b.dataset.tab)})})});
+if(LIVE.news)renderFeed(LIVE.news);else renderFeed([]);
+if(LIVE.weather||LIVE.fx)renderAll();
+liveFetch(false);
+setInterval(function(){liveFetch(false)},5*60e3);
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")liveFetch(false)});
+
+var installPrompt=null;
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();installPrompt=e;$("#installPwa").hidden=false});
+$("#installPwa").addEventListener("click",function(){if(installPrompt){installPrompt.prompt();installPrompt.userChoice.finally(function(){installPrompt=null;$("#installPwa").hidden=true})}});
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})})}
+})();
+</script>
+
+</body></html>

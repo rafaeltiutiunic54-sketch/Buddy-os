@@ -1,0 +1,19 @@
+{
+  "name": "Buddy OS Lite",
+  "short_name": "Buddy OS",
+  "description": "Pet digital e relógio de cabeceira",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#040906",
+  "theme_color": "#040906",
+  "icons": [
+    {
+      "src": "buddy-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
